@@ -4,7 +4,6 @@ use clap::Parser;
 
 use crate::input_format::InputFormat;
 
-
 /// Do basic conversions
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -23,11 +22,12 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    
+
     // Check if input data is provided
     if let Some(input) = args.input {
         // Detect format if not specified, or use the specified format
-        let format = args.from
+        let format = args
+            .from
             .as_ref()
             .and_then(|f| f.parse().ok()) // Try to parse the --from flag
             .or_else(|| input_format::detect_format(&input)); // Try to detect the format
@@ -38,20 +38,29 @@ fn main() {
                 if let Ok(timestamp) = input.parse::<f64>() {
                     println!("Detected UNIX timestamp: {}", timestamp);
                     println!("------------------------");
-                    output_format::output_from_unix_timestamp(timestamp);
+                    // output all formats except for the input format
+                    output_format::output_from_unix_timestamp(
+                        timestamp,
+                        None,
+                        Some(vec![output_format::OutputFormat::UnixTimestamp]),
+                    );
                 } else {
                     println!("Invalid timestamp");
                 }
-            },
+            }
             Some(InputFormat::MillisTimestamp) => {
                 if let Ok(timestamp) = input.parse::<f64>() {
                     println!("Detected millisecond timestamp: {}", timestamp);
                     println!("------------------------");
-                    output_format::output_from_unix_timestamp(timestamp / 1000.0);
+                    output_format::output_from_unix_timestamp(
+                        timestamp / 1000.0,
+                        None,
+                        Some(vec![output_format::OutputFormat::UnixTimestamp]),
+                    );
                 } else {
                     println!("Invalid timestamp");
                 }
-            },
+            }
             // TODO: handle other formats
             _ => println!("Unsupported format"),
         }
