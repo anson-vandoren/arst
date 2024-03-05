@@ -30,7 +30,8 @@ pub(crate) fn output_from_unix_timestamp(
             if (include.is_empty() && !exclude.contains(&OutputFormat::UnixTimestamp))
                 || include.contains(&OutputFormat::UnixTimestamp)
             {
-                println!("Unix Timestamp: {}", timestamp);
+                // Unix timestamp with up to nanoseconds
+                println!("Unix timestamp: {}", timestamp);
             }
             if (include.is_empty() && !exclude.contains(&OutputFormat::Local))
                 || include.contains(&OutputFormat::Local)

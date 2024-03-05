@@ -1,5 +1,7 @@
 mod input_format;
 mod output_format;
+
+use chrono::DateTime;
 use clap::Parser;
 
 use crate::input_format::InputFormat;
@@ -59,6 +61,20 @@ fn main() {
                     );
                 } else {
                     println!("Invalid timestamp");
+                }
+            }
+            Some(InputFormat::ISO8601) => {
+                if let Ok(datetime) = input.parse::<DateTime<chrono::Utc>>() {
+                    println!("Detected ISO8601: {}", datetime);
+                    println!("------------------------");
+                    let timestamp = datetime.timestamp_millis();
+                        output_format::output_from_unix_timestamp(
+                            timestamp as f64 / 1_000.0,
+                            None,
+                            Some(vec![output_format::OutputFormat::ISO8601]),
+                        );
+                } else {
+                    println!("Invalid ISO8601 datetime");
                 }
             }
             // TODO: handle other formats

@@ -4,6 +4,8 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+use chrono::DateTime;
+
 #[derive(Debug, PartialEq)]
 pub enum InputFormat {
     Json,
@@ -48,8 +50,13 @@ impl FromStr for InputFormat {
 }
 
 pub(crate) fn detect_format(input: &str) -> Option<InputFormat> {
-    // check if timestamp
+    // TODO: can probably return the parsed value from here in addition to
+    //       the format type to avoid parsing twice
+    // check if timestamp (seconds or millis)
     if let Some(format) = check_timestamp(input) {
+        return Some(format);
+    }
+    if let Some(format) = check_iso8601(input) {
         return Some(format);
     }
     None
@@ -81,5 +88,40 @@ fn check_timestamp(input: &str) -> Option<InputFormat> {
             }
         }
         Err(_) => None,
+    }
+}
+
+fn check_iso8601(input: &str) -> Option<InputFormat> {
+    match DateTime::parse_from_rfc3339(input) {
+        Ok(_) => Some(InputFormat::ISO8601),
+        Err(_) => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_input_format() {
+        assert_eq!("json".parse(), Ok(InputFormat::Json));
+        assert_eq!("yaml".parse(), Ok(InputFormat::Yaml));
+        assert_eq!("qs".parse(), Ok(InputFormat::QueryString));
+        assert_eq!("querystring".parse(), Ok(InputFormat::QueryString));
+        assert_eq!("urlencoded".parse(), Ok(InputFormat::UrlEncoded));
+        assert_eq!("unix".parse(), Ok(InputFormat::UnixTimestamp));
+        assert_eq!("millis".parse(), Ok(InputFormat::MillisTimestamp));
+        assert_eq!("iso8601".parse(), Ok(InputFormat::ISO8601));
+        assert_eq!("relative".parse(), Ok(InputFormat::RelativeTime));
+        assert_eq!("human".parse(), Ok(InputFormat::HumanTime));
+    }
+
+    #[test]
+    fn test_detect_format() {
+        assert_eq!(detect_format("1709522051125"), Some(InputFormat::MillisTimestamp), "Integer millis failed");
+        assert_eq!(detect_format("1709522051125.123"), Some(InputFormat::MillisTimestamp), "Decimal millis failed");
+        assert_eq!(detect_format("1709522051.125"), Some(InputFormat::UnixTimestamp), "Decimal seconds failed");
+        assert_eq!(detect_format("1709522051"), Some(InputFormat::UnixTimestamp), "Integer seconds failed");
+        assert_eq!(detect_format("2024-03-04T03:14:11.125Z"), Some(InputFormat::ISO8601));
     }
 }

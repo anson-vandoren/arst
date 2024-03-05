@@ -27,11 +27,11 @@ one tool seems convenient.
   - [ ] JS Array of numbers
   - [ ] ASCII
   - [ ] Hex string
-- [ ] Unix time to:
-    - [ ] Relative time
-    - [ ] Human readable time (wtf does this mean? Is there a standard for it?)
-    - [ ] ISO 8601
-    - [ ] And from these back to Unix time, and like such as
+- [x] Unix time (seconds or millis) and ISO 8601 into:
+    - [x] Relative time
+    - [x] Human readable time (wtf does this mean? Is there a standard for it?)
+    - [x] ISO 8601
+    - [x] Local time
 - [ ] MD5, SHA1, SHA256, SHA512
 - [ ] JWT decode
 - [ ] URL encode/decode
